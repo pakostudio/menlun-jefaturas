@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ERP interno — Menlun</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+<style>
+  :root {
+    --navy: #1B3A6B;
+    --gold: #E8A020;
+    --red: #A32D2D;
+    --teal: #0F6E56;
+    --blue: #185FA5;
+    --gray: #888780;
+    --border: #E0E0E0;
+    --bg: #F7F7F6;
+    --bg2: #FFFFFF;
+    --text: #1A1A1A;
+    --text2: #5F5E5A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  /* LOGIN */
+  .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
+  .login-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; width: 100%; max-width: 360px; }
+  .login-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 1.5rem; }
+  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); }
+  .logo-txt { font-size: 15px; font-weight: 600; color: var(--navy); }
+  .logo-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
+  .login-box h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .login-box p { font-size: 12px; color: var(--text2); margin-bottom: 1.25rem; }
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 4px; font-weight: 500; }
+  .form-group input, .form-group select { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: var(--bg2); color: var(--text); outline: none; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--navy); }
+  .btn-primary { width: 100%; padding: 10px; border-radius: 8px; background: var(--navy); color: #fff; border: none; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+  .btn-primary:hover { background: #142d54; }
+  .login-error { color: var(--red); font-size: 11px; text-align: center; margin-top: 8px; display: none; }
+  .demo-hint { margin-top: 1rem; padding: 10px 12px; background: var(--bg); border-radius: 8px; }
+  .demo-hint-title { font-size: 10px; letter-spacing: 1px; color: var(--text2); margin-bottom: 8px; font-weight: 600; }
+  .demo-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px; color: var(--text2); border-radius: 4px; padding: 4px 6px; }
+  .demo-row:hover { background: var(--border); color: var(--text); }
+  .area-chip { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
+
+  /* MAIN LAYOUT */
+  .main-screen { display: none; }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width: 200px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-brand { padding: 1rem; border-bottom: 1px solid var(--border); }
+  .sidebar-logo { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .sidebar-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+  .sidebar-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .sidebar-user { font-size: 11px; color: var(--text2); line-height: 1.4; }
+  .sidebar-user strong { color: var(--text); }
+  .nav-section-title { font-size: 9px; letter-spacing: 1.5px; color: var(--text2); padding: 10px 1rem 4px; font-weight: 600; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 9px 1rem; font-size: 12px; color: var(--text2); cursor: pointer; border-left: 2px solid transparent; transition: all 0.15s; }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { color: var(--navy); border-left-color: var(--navy); background: #EBF0FA; font-weight: 600; }
+  .nav-item i { font-size: 15px; }
+  .sidebar-footer { margin-top: auto; padding: 1rem; border-top: 1px solid var(--border); }
+  .btn-logout { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; cursor: pointer; width: 100%; }
+  .btn-logout:hover { background: var(--bg); }
+
+  /* CONTENT */
+  .content { flex: 1; overflow: auto; }
+  .page { display: none; padding: 1.5rem; }
+  .page.active { display: block; }
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+  .page-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .page-sub { font-size: 12px; color: var(--text2); }
+  .btn-add { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 8px 14px; border-radius: 8px; background: var(--navy); color: #fff; border: none; cursor: pointer; font-weight: 500; }
+  .btn-add:hover { background: #142d54; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .stat-num { font-size: 26px; font-weight: 600; color: var(--text); }
+  .stat-num.red { color: var(--red); }
+  .stat-num.amber { color: #854F0B; }
+  .stat-num.green { color: var(--teal); }
+  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* GRID */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .card-title { font-size: 10px; letter-spacing: 1px; color: var(--text2); margin-bottom: 10px; font-weight: 600; }
+
+  /* TABLE */
+  .table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 1rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 10px; letter-spacing: 0.8px; color: var(--text2); padding: 10px 12px; text-align: left; background: var(--bg); border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { font-size: 12px; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+
+  /* BADGES */
+  .badge { font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+  .bp { background:#FAEEDA;color:#633806; }
+  .bf { background:#E6F1FB;color:#0C447C; }
+  .ba { background:#EEEDFE;color:#3C3489; }
+  .bl { background:#E1F5EE;color:#085041; }
+  .br { background:#EAF3DE;color:#27500A; }
+  .be { background:#F1EFE8;color:#444441; }
+  .bab { background:#FCEBEB;color:#791F1F; }
+  .bpr { background:#FAEEDA;color:#633806; }
+  .bce { background:#E1F5EE;color:#085041; }
+  .bv { background:#E6F1FB;color:#0C447C; }
+  .bll { background:#EEEDFE;color:#3C3489; }
+  .bcot { background:#FAEEDA;color:#633806; }
+  .bmu { background:#E1F5EE;color:#085041; }
+  .bco { background:#FCEBEB;color:#791F1F; }
+  .bci { background:#EAF3DE;color:#27500A; }
+
+  /* SEMÁFORO */
+  .sem { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .sg { background: var(--teal); }
+  .sy { background: var(--gold); }
+  .sr { background: var(--red); }
+
+  /* BOTONES PEQUEÑOS */
+  .btn-sm { font-size: 10px; padding: 3px 9px; border-radius: 5px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; color: var(--text); }
+  .btn-sm:hover { background: var(--border); }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+  .modal-box { background: var(--bg2); border-radius: 12px; border: 1px solid var(--border); padding: 1.5rem; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 15px; font-weight: 600; margin-bottom: 1.25rem; }
+  .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.25rem; }
+  .btn-cancel { font-size: 12px; padding: 7px 14px; border-radius: 7px; background: var(--bg); color: var(--text2); border: 1px solid var(--border); cursor: pointer; }
+  .btn-save { font-size: 12px; padding: 7px 14px; border-radius: 7px; background: var(--navy); color: #fff; border: none; cursor: pointer; font-weight: 600; }
+
+  .empty-state { padding: 2rem; text-align: center; color: var(--text2); font-size: 13px; }
+  .vencido { color: var(--red); font-weight: 600; }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .sidebar { width: 56px; }
+    .sidebar-name, .sidebar-user, .nav-item span, .sidebar-brand p, .nav-section-title, .btn-logout span { display: none; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
+    .page { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-dot"></div>
+      <div>
+        <div class="logo-txt">ERP interno · Menlun</div>
+        <div class="logo-sub">Operadora Química Menlun S.A. de C.V.</div>
+      </div>
+    </div>
+    <h2>Bienvenido</h2>
+    <p>Selecciona tu nombre y escribe tu PIN de acceso</p>
+    <div class="form-group">
+      <label>Usuario</label>
+      <select id="login-user">
+        <option value="">— Selecciona tu nombre —</option>
+        <option value="Pako Ayala|admin">Pako Ayala</option>
+        <option value="Alan Cazes|admin">Alan Cazes</option>
+        <option value="Carmen Nieto|direccion">Carmen Nieto</option>
+        <option value="José Carlos González|ventas">José Carlos González</option>
+        <option value="Guillermo Nieto|logistica">Guillermo Nieto</option>
+        <option value="Moisés Prado|almacen">Moisés Prado</option>
+        <option value="José Luis Sánchez|mantenimiento">José Luis Sánchez</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>PIN de acceso</label>
+      <input type="password" id="login-pin" placeholder="••••" maxlength="4" onkeydown="if(event.key==='Enter')login()"/>
+    </div>
+    <div id="login-error" class="login-error">Usuario o PIN incorrecto</div>
+    <button class="btn-primary" onclick="login()">Entrar</button>
+    <div class="demo-hint">
+      <div class="demo-hint-title">ACCESO RÁPIDO — PIN para todos: 1234</div>
+      <div class="demo-row" onclick="quickLogin('Carmen Nieto|direccion')">Carmen Nieto <span class="area-chip" style="background:#FAEEDA;color:#633806;">Dirección</span></div>
+      <div class="demo-row" onclick="quickLogin('José Carlos González|ventas')">José Carlos González <span class="area-chip" style="background:#E6F1FB;color:#0C447C;">Ventas</span></div>
+      <div class="demo-row" onclick="quickLogin('Guillermo Nieto|logistica')">Guillermo Nieto <span class="area-chip" style="background:#E1F5EE;color:#085041;">Logística</span></div>
+      <div class="demo-row" onclick="quickLogin('Moisés Prado|almacen')">Moisés Prado <span class="area-chip" style="background:#FAEEDA;color:#633806;">Almacén</span></div>
+      <div class="demo-row" onclick="quickLogin('José Luis Sánchez|mantenimiento')">José Luis Sánchez <span class="area-chip" style="background:#FCEBEB;color:#791F1F;">Mantenimiento</span></div>
+      <div class="demo-row" onclick="quickLogin('Pako Ayala|admin')">Pako / Alan <span class="area-chip" style="background:#EEEDFE;color:#3C3489;">Admin</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-screen" id="main-screen">
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo"><div class="sidebar-dot"></div><span class="sidebar-name">ERP Menlun</span></div>
+        <div class="sidebar-user" id="sb-user">—</div>
+      </div>
+      <div id="nav-menu"></div>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()"><i class="ti ti-logout"></i><span>Salir</span></button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div><div class="page-title" id="dash-greeting">Tablero</div><div class="page-sub" id="dash-date"></div></div>
+          <button class="btn-add" onclick="loadDashboard()"><i class="ti ti-refresh"></i> Actualizar</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="d-pedidos">—</div><div class="stat-label">Pedidos activos</div></div>
+          <div class="stat-card"><div class="stat-num red" id="d-vencidos">—</div><div class="stat-label">Pedidos vencidos</div></div>
+          <div class="stat-card"><div class="stat-num amber" id="d-mant">—</div><div class="stat-label">Órdenes mantenimiento</div></div>
+          <div class="stat-card"><div class="stat-num red" id="d-stock">—</div><div class="stat-label">Stock crítico</div></div>
+        </div>
+        <div class="grid2">
+          <div class="card"><div class="card-title">SEMÁFORO POR ÁREA</div><div id="d-semaforo"></div></div>
+          <div class="card"><div class="card-title">ALERTAS ACTIVAS</div><div id="d-alertas"></div></div>
+        </div>
+      </div>
+
+      <!-- PEDIDOS -->
+      <div class="page" id="page-pedidos">
+        <div class="page-header">
+          <div><div class="page-title">Pedidos</div><div class="page-sub">Pendientes de surtir por cliente</div></div>
+          <button class="btn-add" onclick="openModal('pedido')"><i class="ti ti-plus"></i> Nuevo pedido</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>FOLIO</th><th>CLIENTE</th><th>ENTREGA</th><th>ESTATUS</th><th>NOTAS</th><th>ACCIÓN</th></tr></thead>
+            <tbody id="t-pedidos"><tr><td colspan="6" class="empty-state">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MANTENIMIENTO -->
+      <div class="page" id="page-mantenimiento">
+        <div class="page-header">
+          <div><div class="page-title">Mantenimiento</div><div class="page-sub">Órdenes de trabajo digitales — adiós al papel</div></div>
+          <button class="btn-add" onclick="openModal('mant')"><i class="ti ti-plus"></i> Nueva orden</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>FOLIO</th><th>EQUIPO</th><th>ÁREA</th><th>TIPO</th><th>DESCRIPCIÓN</th><th>ESTATUS</th><th>ACCIÓN</th></tr></thead>
+            <tbody id="t-mant"><tr><td colspan="7" class="empty-state">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CRM -->
+      <div class="page" id="page-crm">
+        <div class="page-header">
+          <div><div class="page-title">CRM — Ventas</div><div class="page-sub">Seguimiento comercial, muestras y comodatos</div></div>
+          <button class="btn-add" onclick="openModal('crm')"><i class="ti ti-plus"></i> Nuevo seguimiento</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>CLIENTE</th><th>TIPO</th><th>DESCRIPCIÓN</th><th>COMPROMISO</th><th>FECHA</th><th>ESTATUS</th><th>ACCIÓN</th></tr></thead>
+            <tbody id="t-crm"><tr><td colspan="7" class="empty-state">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ALMACÉN -->
+      <div class="page" id="page-almacen">
+        <div class="page-header">
+          <div><div class="page-title">Almacén</div><div class="page-sub">Inventario, stock mínimo y control de mermas</div></div>
+          <button class="btn-add" onclick="openModal('inv')"><i class="ti ti-plus"></i> Agregar producto</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>PRODUCTO</th><th>LOTE</th><th>CANTIDAD</th><th>UNIDAD</th><th>STOCK MÍN.</th><th>NIVEL</th><th>CADUCIDAD</th></tr></thead>
+            <tbody id="t-almacen"><tr><td colspan="7" class="empty-state">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTAINER -->
+<div id="modal-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const SB = supabase.createClient(
+  'https://bljqlibgwvpflrtwgsef.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsanFsaWJnd3ZwZmxydHdnc2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTE0NjgsImV4cCI6MjA5Njc4NzQ2OH0.F4ESg1FD0k4cTwGMT9E6n-LMr45FB0FZTfXmnuqHkJs'
+);
+
+let currentUser = null;
+let currentArea = null;
+
+const NAV = {
+  admin:         ['dashboard','pedidos','mantenimiento','crm','almacen'],
+  direccion:     ['dashboard','pedidos','mantenimiento','crm','almacen'],
+  ventas:        ['dashboard','pedidos','crm'],
+  logistica:     ['dashboard','pedidos'],
+  almacen:       ['dashboard','almacen'],
+  mantenimiento: ['dashboard','mantenimiento'],
+};
+const NAV_META = {
+  dashboard:     { icon: 'ti-layout-dashboard', label: 'Tablero' },
+  pedidos:       { icon: 'ti-package',          label: 'Pedidos' },
+  mantenimiento: { icon: 'ti-tool',             label: 'Mantenimiento' },
+  crm:           { icon: 'ti-users',            label: 'CRM Ventas' },
+  almacen:       { icon: 'ti-building-warehouse', label: 'Almacén' },
+};
+const AREA_LABEL = { admin:'Admin', direccion:'Dirección', ventas:'Ventas', logistica:'Logística', almacen:'Almacén', mantenimiento:'Mantenimiento' };
+
+function login() {
+  const val = document.getElementById('login-user').value;
+  const pin = document.getElementById('login-pin').value;
+  if (!val || pin !== '1234') { document.getElementById('login-error').style.display = 'block'; return; }
+  const [nombre, area] = val.split('|');
+  enterApp(nombre, area);
+}
+
+function quickLogin(val) {
+  const [nombre, area] = val.split('|');
+  enterApp(nombre, area);
+}
+
+function enterApp(nombre, area) {
+  currentUser = nombre; currentArea = area;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'block';
+  document.getElementById('sb-user').innerHTML = `<strong>${nombre}</strong><br>${AREA_LABEL[area]||area}`;
+  const paginas = NAV[area] || ['dashboard'];
+  document.getElementById('nav-menu').innerHTML =
+    `<div class="nav-section-title">MENÚ</div>` +
+    paginas.map(p => `<div class="nav-item${p==='dashboard'?' active':''}" onclick="goTo('${p}',this)"><i class="ti ${NAV_META[p].icon}"></i><span>${NAV_META[p].label}</span></div>`).join('');
+  document.getElementById('dash-greeting').textContent = `Buenos días, ${nombre.split(' ')[0]}`;
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  goTo('dashboard', document.querySelector('.nav-item'));
+}
+
+function logout() {
+  currentUser = null; currentArea = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('login-pin').value = '';
+  document.getElementById('login-error').style.display = 'none';
+}
+
+function goTo(page, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const loaders = { dashboard: loadDashboard, pedidos: loadPedidos, mantenimiento: loadMant, crm: loadCRM, almacen: loadAlmacen };
+  if (loaders[page]) loaders[page]();
+}
+
+/* ── DASHBOARD ── */
+async function loadDashboard() {
+  const hoy = new Date().toISOString().split('T')[0];
+  const [rP,rM,rI,rC] = await Promise.all([
+    SB.from('pedidos').select('estatus,fecha_entrega_requerida').schema('menlun'),
+    SB.from('ordenes_mantenimiento').select('estatus,tipo').schema('menlun'),
+    SB.from('inventario').select('cantidad,stock_minimo').schema('menlun'),
+    SB.from('crm_seguimiento').select('tipo,estatus,fecha_seguimiento').schema('menlun'),
+  ]);
+  const p=rP.data||[],m=rM.data||[],i=rI.data||[],c=rC.data||[];
+  const act=p.filter(x=>!['entregado','cancelado'].includes(x.estatus));
+  const ven=act.filter(x=>x.fecha_entrega_requerida&&x.fecha_entrega_requerida<hoy);
+  const maAb=m.filter(x=>['abierta','en_proceso'].includes(x.estatus));
+  const sc=i.filter(x=>x.stock_minimo>0&&x.cantidad<=x.stock_minimo);
+  const pend=c.filter(x=>x.estatus==='pendiente').length;
+  const urg=m.filter(x=>x.tipo==='urgente'&&x.estatus!=='cerrada').length;
+  document.getElementById('d-pedidos').textContent=act.length;
+  document.getElementById('d-vencidos').textContent=ven.length;
+  document.getElementById('d-mant').textContent=maAb.length;
+  document.getElementById('d-stock').textContent=sc.length;
+  const rows=[
+    ['Ventas',ven.length>2?'r':act.length>0?'g':'y',`${pend} seguimientos pendientes`],
+    ['Logística',ven.length>0?'y':'g',`${ven.length} pedidos con fecha vencida`],
+    ['Almacén',sc.length>0?'r':'g',`${sc.length} productos bajo mínimo`],
+    ['Mantenimiento',urg>0?'r':maAb.length>3?'y':'g',`${maAb.length} órdenes activas`],
+  ];
+  document.getElementById('d-semaforo').innerHTML=rows.map(([a,s,d])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:7px;"><span class="sem s${s}"></span><span style="font-weight:600;font-size:12px;">${a}</span></div>
+      <span style="font-size:11px;color:var(--text2);">${d}</span>
+    </div>`).join('');
+  const al=[];
+  if(ven.length) al.push(`⚠️ ${ven.length} pedido(s) con entrega vencida`);
+  if(sc.length) al.push(`📦 ${sc.length} producto(s) bajo stock mínimo`);
+  if(urg) al.push(`🔧 Órdenes urgentes de mantenimiento sin cerrar`);
+  if(pend>3) al.push(`📋 ${pend} seguimientos comerciales pendientes`);
+  if(!al.length) al.push('✅ Todo en orden — sin alertas activas');
+  document.getElementById('d-alertas').innerHTML=al.map(a=>`<div style="font-size:12px;padding:8px 0;border-bottom:1px solid var(--border);">${a}</div>`).join('');
+}
+
+/* ── PEDIDOS ── */
+const PS={'pendiente':'bf','facturado':'bf','en_almacen':'ba','listo_ruta':'bl','en_ruta':'br','entregado':'be','cancelado':'be'};
+const SIG={pendiente:'facturado',facturado:'en_almacen',en_almacen:'listo_ruta',listo_ruta:'en_ruta',en_ruta:'entregado'};
+const LBL={pendiente:'Facturar',facturado:'En almacén',en_almacen:'Listo ruta',listo_ruta:'Salió',en_ruta:'Entregado'};
+
+async function loadPedidos() {
+  const hoy=new Date().toISOString().split('T')[0];
+  const {data}=await SB.from('pedidos').select('*,clientes(nombre)').schema('menlun').order('fecha_pedido',{ascending:false});
+  const p=data||[];
+  if(!p.length){document.getElementById('t-pedidos').innerHTML=`<tr><td colspan="6" class="empty-state">Sin pedidos aún — agrega el primero</td></tr>`;return;}
+  document.getElementById('t-pedidos').innerHTML=p.map(x=>{
+    const v=x.fecha_entrega_requerida&&x.fecha_entrega_requerida<hoy&&x.estatus!=='entregado';
+    return `<tr>
+      <td><strong>${x.folio}</strong></td>
+      <td>${x.clientes?.nombre||'—'}</td>
+      <td class="${v?'vencido':''}">${x.fecha_entrega_requerida||'—'}${v?' ⚠':''}</td>
+      <td><span class="badge ${PS[x.estatus]||'bp'}">${x.estatus.replace(/_/g,' ')}</span></td>
+      <td style="color:var(--text2);font-size:11px;">${x.notas||'—'}</td>
+      <td>${SIG[x.estatus]?`<button class="btn-sm" onclick="advancePedido('${x.id}','${SIG[x.estatus]}')">${LBL[x.estatus]}</button>`:'✓'}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function advancePedido(id,est){
+  await SB.from('pedidos').update({estatus:est,actualizado_en:new Date().toISOString()}).eq('id',id).schema('menlun');
+  loadPedidos();
+}
+
+/* ── MANTENIMIENTO ── */
+async function loadMant(){
+  const {data}=await SB.from('ordenes_mantenimiento').select('*').schema('menlun').order('creado_en',{ascending:false});
+  const m=data||[];
+  if(!m.length){document.getElementById('t-mant').innerHTML=`<tr><td colspan="7" class="empty-state">Sin órdenes — abre la primera</td></tr>`;return;}
+  const ES={abierta:'bab',en_proceso:'bpr',cerrada:'bce',cancelada:'be'};
+  const TI={preventivo:'bf',correctivo:'bpr',urgente:'bab'};
+  const SIGA={abierta:'en_proceso',en_proceso:'cerrada'};
+  const LBLA={abierta:'Iniciar',en_proceso:'Cerrar'};
+  document.getElementById('t-mant').innerHTML=m.map(x=>`<tr>
+    <td><strong>${x.folio}</strong></td>
+    <td>${x.equipo}</td>
+    <td style="color:var(--text2)">${x.area}</td>
+    <td><span class="badge ${TI[x.tipo]||'bp'}">${x.tipo}</span></td>
+    <td style="color:var(--text2);font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${x.descripcion||'—'}</td>
+    <td><span class="badge ${ES[x.estatus]||'bab'}">${x.estatus.replace('_',' ')}</span></td>
+    <td>${SIGA[x.estatus]?`<button class="btn-sm" onclick="advanceMant('${x.id}','${SIGA[x.estatus]}')">${LBLA[x.estatus]}</button>`:'✓'}</td>
+  </tr>`).join('');
+}
+
+async function advanceMant(id,est){
+  const u={estatus:est};
+  if(est==='cerrada') u.fecha_cierre=new Date().toISOString().split('T')[0];
+  await SB.from('ordenes_mantenimiento').update(u).eq('id',id).schema('menlun');
+  loadMant();
+}
+
+/* ── CRM ── */
+const TCS={visita:'bv',llamada:'bll',cotizacion:'bcot',muestra:'bmu',comodato:'bco',cierre:'bci'};
+const ECS={pendiente:'bpr',realizado:'bce',cancelado:'be'};
+
+async function loadCRM(){
+  const {data}=await SB.from('crm_seguimiento').select('*,clientes(nombre)').schema('menlun').order('fecha_seguimiento',{ascending:true});
+  const c=data||[];
+  const hoy=new Date().toISOString().split('T')[0];
+  if(!c.length){document.getElementById('t-crm').innerHTML=`<tr><td colspan="7" class="empty-state">Sin seguimientos — agrega el primero</td></tr>`;return;}
+  document.getElementById('t-crm').innerHTML=c.map(x=>{
+    const v=x.estatus==='pendiente'&&x.fecha_seguimiento&&x.fecha_seguimiento<hoy;
+    return `<tr>
+      <td><strong>${x.clientes?.nombre||'—'}</strong></td>
+      <td><span class="badge ${TCS[x.tipo]||'bp'}">${x.tipo}</span></td>
+      <td style="color:var(--text2);font-size:11px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${x.descripcion||'—'}</td>
+      <td style="color:var(--text2);font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${x.compromiso||'—'}</td>
+      <td class="${v?'vencido':''}">${x.fecha_seguimiento||'—'}${v?' ⚠':''}</td>
+      <td><span class="badge ${ECS[x.estatus]||'bp'}">${x.estatus}</span></td>
+      <td>${x.estatus==='pendiente'?`<button class="btn-sm" onclick="closeCRM('${x.id}')">✓ Realizado</button>`:'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function closeCRM(id){
+  await SB.from('crm_seguimiento').update({estatus:'realizado'}).eq('id',id).schema('menlun');
+  loadCRM();
+}
+
+/* ── ALMACÉN ── */
+async function loadAlmacen(){
+  const {data}=await SB.from('inventario').select('*').schema('menlun').order('producto');
+  const i=data||[];
+  if(!i.length){document.getElementById('t-almacen').innerHTML=`<tr><td colspan="7" class="empty-state">Sin productos — agrega el primero</td></tr>`;return;}
+  const hoy=new Date().toISOString().split('T')[0];
+  const en30=new Date(); en30.setDate(en30.getDate()+30);
+  const en30s=en30.toISOString().split('T')[0];
+  document.getElementById('t-almacen').innerHTML=i.map(x=>{
+    const cad=x.caducidad&&x.caducidad<hoy;
+    const pc=x.caducidad&&x.caducidad>=hoy&&x.caducidad<=en30s;
+    const nv=x.stock_minimo>0?(x.cantidad<=0?'Crítico':x.cantidad<=x.stock_minimo?'Bajo':'OK'):'—';
+    const nc={OK:'bce',Bajo:'bpr',Crítico:'bab','—':'be'};
+    return `<tr>
+      <td><strong>${x.producto}</strong></td>
+      <td style="color:var(--text2)">${x.lote||'—'}</td>
+      <td><strong>${x.cantidad}</strong></td>
+      <td style="color:var(--text2)">${x.unidad||'—'}</td>
+      <td style="color:var(--text2)">${x.stock_minimo||0}</td>
+      <td><span class="badge ${nc[nv]}">${nv}</span></td>
+      <td class="${cad?'vencido':pc?'':''}">  ${x.caducidad||'—'}${cad?' ⚠':''}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── MODALES ── */
+function openModal(type){
+  const html={
+    pedido:`<div class="modal-box"><div class="modal-title">Nuevo pedido</div>
+      <div class="form-group"><label>Folio</label><input id="mf" placeholder="POQ-001"/></div>
+      <div class="form-group"><label>Cliente</label><input id="mc" placeholder="Nombre del cliente"/></div>
+      <div class="f2">
+        <div class="form-group"><label>Fecha entrega</label><input type="date" id="mfe"/></div>
+        <div class="form-group"><label>Notas</label><input id="mn" placeholder="Opcional"/></div>
+      </div>
+      <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="savePedido()">Guardar</button></div>
+    </div>`,
+    mant:`<div class="modal-box"><div class="modal-title">Nueva orden de mantenimiento</div>
+      <div class="f2">
+        <div class="form-group"><label>Folio</label><input id="mf" placeholder="OT-001"/></div>
+        <div class="form-group"><label>Tipo</label><select id="mt"><option value="correctivo">Correctivo</option><option value="preventivo">Preventivo</option><option value="urgente">Urgente</option></select></div>
+      </div>
+      <div class="f2">
+        <div class="form-group"><label>Equipo</label><input id="meq" placeholder="Nombre del equipo"/></div>
+        <div class="form-group"><label>Área</label><input id="mar" placeholder="Ej. Calidad"/></div>
+      </div>
+      <div class="form-group"><label>Descripción del problema</label><input id="md" placeholder="¿Qué falla o qué se va a realizar?"/></div>
+      <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveMant()">Guardar</button></div>
+    </div>`,
+    crm:`<div class="modal-box"><div class="modal-title">Nuevo seguimiento comercial</div>
+      <div class="f2">
+        <div class="form-group"><label>Cliente</label><input id="mc" placeholder="Nombre del cliente"/></div>
+        <div class="form-group"><label>Tipo</label><select id="mt"><option value="visita">Visita</option><option value="llamada">Llamada</option><option value="cotizacion">Cotización</option><option value="muestra">Muestra</option><option value="comodato">Comodato</option><option value="cierre">Cierre</option></select></div>
+      </div>
+      <div class="form-group"><label>Descripción</label><input id="md" placeholder="¿Qué se hizo o qué se va a hacer?"/></div>
+      <div class="form-group"><label>Compromiso / siguiente paso</label><input id="mco" placeholder="¿Qué quedó comprometido?"/></div>
+      <div class="form-group"><label>Fecha de seguimiento</label><input type="date" id="mfe"/></div>
+      <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveCRM()">Guardar</button></div>
+    </div>`,
+    inv:`<div class="modal-box"><div class="modal-title">Nuevo producto en inventario</div>
+      <div class="form-group"><label>Producto</label><input id="mp" placeholder="Ej. H3 Super Foam, garrafón 25 Kg"/></div>
+      <div class="f2">
+        <div class="form-group"><label>Lote</label><input id="ml" placeholder="LT-001"/></div>
+        <div class="form-group"><label>Unidad</label><input id="mu" placeholder="pieza / kg / litro"/></div>
+      </div>
+      <div class="f2">
+        <div class="form-group"><label>Cantidad actual</label><input type="number" id="mca" placeholder="0"/></div>
+        <div class="form-group"><label>Stock mínimo</label><input type="number" id="mm" placeholder="0"/></div>
+      </div>
+      <div class="form-group"><label>Fecha de caducidad</label><input type="date" id="mcd"/></div>
+      <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveInv()">Guardar</button></div>
+    </div>`,
+  };
+  document.getElementById('modal-container').innerHTML=`<div class="modal-overlay" onclick="if(event.target===this)closeModal()">${html[type]||''}</div>`;
+}
+function closeModal(){ document.getElementById('modal-container').innerHTML=''; }
+
+async function savePedido(){
+  const f=document.getElementById('mf').value.trim(), c=document.getElementById('mc').value.trim();
+  if(!f||!c) return alert('Folio y cliente son obligatorios');
+  let cid=null;
+  const {data:ce}=await SB.from('clientes').select('id').eq('nombre',c).schema('menlun').maybeSingle();
+  if(ce) cid=ce.id;
+  else { const {data:nc}=await SB.from('clientes').insert({nombre:c}).select('id').schema('menlun').single(); if(nc) cid=nc.id; }
+  await SB.from('pedidos').insert({folio:f,cliente_id:cid,fecha_entrega_requerida:document.getElementById('mfe').value||null,notas:document.getElementById('mn').value||null,estatus:'pendiente'}).schema('menlun');
+  closeModal(); loadPedidos();
+}
+
+async function saveMant(){
+  const f=document.getElementById('mf').value.trim(), eq=document.getElementById('meq').value.trim(), ar=document.getElementById('mar').value.trim();
+  if(!f||!eq||!ar) return alert('Folio, equipo y área son obligatorios');
+  await SB.from('ordenes_mantenimiento').insert({folio:f,equipo:eq,area:ar,tipo:document.getElementById('mt').value,descripcion:document.getElementById('md').value||null,estatus:'abierta',fecha_apertura:new Date().toISOString().split('T')[0]}).schema('menlun');
+  closeModal(); loadMant();
+}
+
+async function saveCRM(){
+  const c=document.getElementById('mc').value.trim();
+  if(!c) return alert('El cliente es obligatorio');
+  let cid=null;
+  const {data:ce}=await SB.from('clientes').select('id').eq('nombre',c).schema('menlun').maybeSingle();
+  if(ce) cid=ce.id;
+  else { const {data:nc}=await SB.from('clientes').insert({nombre:c}).select('id').schema('menlun').single(); if(nc) cid=nc.id; }
+  await SB.from('crm_seguimiento').insert({cliente_id:cid,tipo:document.getElementById('mt').value,descripcion:document.getElementById('md').value||null,compromiso:document.getElementById('mco').value||null,fecha_seguimiento:document.getElementById('mfe').value||null,estatus:'pendiente'}).schema('menlun');
+  closeModal(); loadCRM();
+}
+
+async function saveInv(){
+  const p=document.getElementById('mp').value.trim();
+  if(!p) return alert('El nombre del producto es obligatorio');
+  await SB.from('inventario').insert({producto:p,lote:document.getElementById('ml').value||null,unidad:document.getElementById('mu').value||'pieza',cantidad:parseFloat(document.getElementById('mca').value)||0,stock_minimo:parseFloat(document.getElementById('mm').value)||0,caducidad:document.getElementById('mcd').value||null}).schema('menlun');
+  closeModal(); loadAlmacen();
+}
+</script>
+</body>
+</html>
