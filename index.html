@@ -160,6 +160,18 @@
   .textarea { width:100%; min-height:70px; resize:vertical; padding:9px 11px; border:1px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; outline:none; }
   .toolbar-inline { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
 
+
+  /* FLUJO OPERATIVO */
+  .flow-steps { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .flow-step { font-size:10px; padding:5px 8px; border-radius:999px; border:1px solid var(--border); background:#fff; color:var(--text2); font-weight:700; }
+  .flow-step.active { background:var(--cyan-soft); color:var(--navy); border-color:rgba(0,167,216,.35); }
+  .flow-step.done { background:#E1F5EE; color:#085041; border-color:#B6E3D2; }
+  .flow-card-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:12px; }
+  .flow-mini-card { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:12px; }
+  .flow-mini-num { font-size:22px; font-weight:800; color:var(--navy); }
+  .flow-mini-label { font-size:11px; color:var(--text2); margin-top:3px; }
+  @media (max-width: 900px){ .flow-card-grid { grid-template-columns: 1fr 1fr; } }
+
   /* RESPONSIVE */
   @media (max-width: 640px) {
     .sidebar { width: 56px; }
@@ -268,6 +280,27 @@
       </div>
 
 
+
+      <!-- FLUJO OPERATIVO -->
+      <div class="page" id="page-flujo">
+        <div class="page-header">
+          <div><div class="page-title">Flujo operativo</div><div class="page-sub">Pedido → factura → almacén → logística → evidencia → cierre</div></div>
+          <button class="btn-add" onclick="openModal('flujo')"><i class="ti ti-route"></i> Nuevo flujo</button>
+        </div>
+        <div class="flow-card-grid">
+          <div class="flow-mini-card"><div class="flow-mini-num" id="f-activos">—</div><div class="flow-mini-label">Flujos activos</div></div>
+          <div class="flow-mini-card"><div class="flow-mini-num" id="f-bloqueados">—</div><div class="flow-mini-label">Con bloqueo</div></div>
+          <div class="flow-mini-card"><div class="flow-mini-num" id="f-vencidos">—</div><div class="flow-mini-label">Compromisos vencidos</div></div>
+          <div class="flow-mini-card"><div class="flow-mini-num" id="f-cerrados">—</div><div class="flow-mini-label">Cerrados</div></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>FOLIO</th><th>CLIENTE</th><th>ETAPA</th><th>RESPONSABLE</th><th>COMPROMISO</th><th>BLOQUEO</th><th>COMENTARIO</th><th>ACCIÓN</th></tr></thead>
+            <tbody id="t-flujo"><tr><td colspan="8" class="empty-state">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- BLOQUEOS -->
       <div class="page" id="page-bloqueos">
         <div class="page-header">
@@ -372,16 +405,17 @@ let currentArea = null;
 let currentPage = 'dashboard';
 
 const NAV = {
-  admin:         ['dashboard','pedidos','bloqueos','mantenimiento','crm','almacen','bitacora'],
-  direccion:     ['dashboard','pedidos','bloqueos','mantenimiento','crm','almacen','bitacora'],
-  ventas:        ['dashboard','pedidos','bloqueos','crm'],
-  logistica:     ['dashboard','pedidos','bloqueos'],
+  admin:         ['dashboard','pedidos','flujo','bloqueos','mantenimiento','crm','almacen','bitacora'],
+  direccion:     ['dashboard','pedidos','flujo','bloqueos','mantenimiento','crm','almacen','bitacora'],
+  ventas:        ['dashboard','pedidos','flujo','bloqueos','crm'],
+  logistica:     ['dashboard','pedidos','flujo','bloqueos'],
   almacen:       ['dashboard','almacen','bloqueos'],
   mantenimiento: ['dashboard','mantenimiento','bloqueos'],
 };
 const NAV_META = {
   dashboard:     { icon: 'ti-layout-dashboard', label: 'Tablero' },
   pedidos:       { icon: 'ti-package',          label: 'Pedidos' },
+  flujo:        { icon: 'ti-route',            label: 'Flujo Operativo' },
   bloqueos:      { icon: 'ti-alert-triangle',   label: 'Bloqueos' },
   mantenimiento: { icon: 'ti-tool',             label: 'Mantenimiento' },
   crm:           { icon: 'ti-users',            label: 'CRM Ventas' },
@@ -435,7 +469,7 @@ function goTo(page, el) {
   if (el) el.classList.add('active');
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  const loaders = { dashboard: loadDashboard, pedidos: loadPedidos, bloqueos: loadBloqueos, mantenimiento: loadMant, crm: loadCRM, almacen: loadAlmacen, bitacora: loadBitacora };
+  const loaders = { dashboard: loadDashboard, pedidos: loadPedidos, flujo: loadFlujo, bloqueos: loadBloqueos, mantenimiento: loadMant, crm: loadCRM, almacen: loadAlmacen, bitacora: loadBitacora };
   if (loaders[page]) loaders[page]();
 }
 
@@ -446,7 +480,7 @@ function updateTopDate(){
 }
 function loadCurrentPage(){
   updateTopDate();
-  const loaders = { dashboard: loadDashboard, pedidos: loadPedidos, bloqueos: loadBloqueos, mantenimiento: loadMant, crm: loadCRM, almacen: loadAlmacen, bitacora: loadBitacora };
+  const loaders = { dashboard: loadDashboard, pedidos: loadPedidos, flujo: loadFlujo, bloqueos: loadBloqueos, mantenimiento: loadMant, crm: loadCRM, almacen: loadAlmacen, bitacora: loadBitacora };
   if(loaders[currentPage]) loaders[currentPage]();
 }
 function captureError(error, context){
@@ -549,6 +583,116 @@ async function advancePedido(id,est){
   await SB.from('pedidos').update({estatus:est,actualizado_en:new Date().toISOString()}).eq('id',id);
   await logAction('pedidos','cambio_estatus',`${id} → ${est}`);
   loadPedidos();
+}
+
+
+
+/* ── FLUJO OPERATIVO ── */
+const FLOW_ORDER = ['pedido_recibido','factura_solicitada','factura_emitida','almacen_surtido','logistica_programada','en_ruta','evidencia_cargada','cerrado'];
+const FLOW_LABEL = {
+  pedido_recibido:'Pedido recibido',
+  factura_solicitada:'Factura solicitada',
+  factura_emitida:'Factura emitida',
+  almacen_surtido:'Almacén surtido',
+  logistica_programada:'Logística programada',
+  en_ruta:'En ruta',
+  evidencia_cargada:'Evidencia cargada',
+  cerrado:'Cerrado'
+};
+const FLOW_NEXT = {
+  pedido_recibido:'factura_solicitada',
+  factura_solicitada:'factura_emitida',
+  factura_emitida:'almacen_surtido',
+  almacen_surtido:'logistica_programada',
+  logistica_programada:'en_ruta',
+  en_ruta:'evidencia_cargada',
+  evidencia_cargada:'cerrado'
+};
+
+function renderFlowSteps(etapa){
+  const idx = FLOW_ORDER.indexOf(etapa);
+  return `<div class="flow-steps">` + FLOW_ORDER.map((s,i)=>{
+    const cls = i < idx ? 'done' : i === idx ? 'active' : '';
+    return `<span class="flow-step ${cls}">${FLOW_LABEL[s]}</span>`;
+  }).join('') + `</div>`;
+}
+
+async function loadFlujo(){
+  try{
+    const hoy = new Date().toISOString().split('T')[0];
+    const {data,error}=await SB.from('flujo_pedidos').select('*').order('actualizado_en',{ascending:false});
+    if(error) throw error;
+    const rows=data||[];
+    const activos=rows.filter(x=>x.etapa_actual!=='cerrado');
+    const bloqueados=rows.filter(x=>x.bloqueado===true && x.etapa_actual!=='cerrado');
+    const vencidos=activos.filter(x=>x.fecha_compromiso && x.fecha_compromiso<hoy);
+    const cerrados=rows.filter(x=>x.etapa_actual==='cerrado');
+    document.getElementById('f-activos').textContent=activos.length;
+    document.getElementById('f-bloqueados').textContent=bloqueados.length;
+    document.getElementById('f-vencidos').textContent=vencidos.length;
+    document.getElementById('f-cerrados').textContent=cerrados.length;
+    if(!rows.length){document.getElementById('t-flujo').innerHTML=`<tr><td colspan="8" class="empty-state">Sin flujos registrados — crea el primero desde Nuevo flujo</td></tr>`;return;}
+    document.getElementById('t-flujo').innerHTML=rows.map(x=>{
+      const vencido=x.etapa_actual!=='cerrado'&&x.fecha_compromiso&&x.fecha_compromiso<hoy;
+      const next=FLOW_NEXT[x.etapa_actual];
+      return `<tr>
+        <td><strong>${x.folio||'—'}</strong></td>
+        <td>${x.cliente||'—'}</td>
+        <td>${renderFlowSteps(x.etapa_actual||'pedido_recibido')}</td>
+        <td>${x.responsable_actual||'—'}</td>
+        <td class="${vencido?'vencido':''}">${x.fecha_compromiso||'—'}${vencido?' ⚠':''}</td>
+        <td>${x.bloqueado?`<span class="badge bab">Bloqueado</span>`:`<span class="badge bce">Libre</span>`}</td>
+        <td style="color:var(--text2);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${x.comentario||'—'}</td>
+        <td>${next?`<button class="btn-sm" onclick="advanceFlujo('${x.id}','${next}')">${FLOW_LABEL[next]}</button>`:'✓'}</td>
+      </tr>`;
+    }).join('');
+  }catch(error){
+    captureError(error,'loadFlujo');
+    document.getElementById('t-flujo').innerHTML=`<tr><td colspan="8" class="empty-state">Falta activar la tabla menlun.flujo_pedidos en Supabase para usar el flujo operativo.</td></tr>`;
+  }
+}
+
+async function advanceFlujo(id,next){
+  try{
+    const update={ etapa_actual: next, actualizado_en:new Date().toISOString() };
+    if(next==='cerrado') update.cerrado_en=new Date().toISOString();
+    const {error}=await SB.from('flujo_pedidos').update(update).eq('id',id);
+    if(error) throw error;
+    await logAction('flujo','avance_etapa',`${id} → ${FLOW_LABEL[next]||next}`);
+    loadFlujo();
+  }catch(error){
+    captureError(error,'advanceFlujo');
+    alert('No se pudo avanzar el flujo. Revisa conexión o permisos.');
+  }
+}
+
+async function saveFlujo(){
+  const folio=document.getElementById('mff').value.trim();
+  const cliente=document.getElementById('mfc').value.trim();
+  const responsable=document.getElementById('mfr').value.trim();
+  if(!folio||!cliente||!responsable) return alert('Folio, cliente y responsable son obligatorios');
+  const payload={
+    folio,
+    cliente,
+    etapa_actual:'pedido_recibido',
+    responsable_actual:responsable,
+    fecha_compromiso:document.getElementById('mfd').value||null,
+    bloqueado:document.getElementById('mfb').value==='si',
+    motivo_bloqueo:document.getElementById('mfm').value||null,
+    comentario:document.getElementById('mfn').value||null,
+    creado_por:currentUser||'Sistema',
+    creado_en:new Date().toISOString(),
+    actualizado_en:new Date().toISOString()
+  };
+  try{
+    const {error}=await SB.from('flujo_pedidos').insert(payload);
+    if(error) throw error;
+    await logAction('flujo','crear',`${payload.folio} · ${payload.cliente}`);
+    closeModal(); loadFlujo();
+  }catch(error){
+    captureError(error,'saveFlujo');
+    alert('No se pudo guardar el flujo. Primero ejecuta el SQL de Sprint 2 en Supabase.');
+  }
 }
 
 
@@ -711,6 +855,23 @@ function openModal(type){
       <div class="form-group"><label>Compromiso / siguiente paso</label><input id="mco" placeholder="¿Qué quedó comprometido?"/></div>
       <div class="form-group"><label>Fecha de seguimiento</label><input type="date" id="mfe"/></div>
       <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveCRM()">Guardar</button></div>
+    </div>`,
+
+    flujo:`<div class="modal-box"><div class="modal-title">Nuevo flujo operativo</div>
+      <div class="f2">
+        <div class="form-group"><label>Folio pedido</label><input id="mff" placeholder="POQ-2881"/></div>
+        <div class="form-group"><label>Cliente</label><input id="mfc" placeholder="Nombre del cliente"/></div>
+      </div>
+      <div class="f2">
+        <div class="form-group"><label>Responsable actual</label><input id="mfr" placeholder="Nombre responsable"/></div>
+        <div class="form-group"><label>Fecha compromiso</label><input type="date" id="mfd"/></div>
+      </div>
+      <div class="f2">
+        <div class="form-group"><label>¿Está bloqueado?</label><select id="mfb"><option value="no">No</option><option value="si">Sí</option></select></div>
+        <div class="form-group"><label>Motivo bloqueo</label><input id="mfm" placeholder="Factura / surtido / autorización"/></div>
+      </div>
+      <div class="form-group"><label>Comentario / siguiente acción</label><textarea class="textarea" id="mfn" placeholder="Qué debe pasar para avanzar"></textarea></div>
+      <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveFlujo()">Guardar</button></div>
     </div>`,
     bloqueo:`<div class="modal-box"><div class="modal-title">Nuevo bloqueo operativo</div>
       <div class="f2">
