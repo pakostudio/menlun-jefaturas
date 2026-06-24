@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MENLUN NEXUS · PMPS · Sprint 3</title>
-<meta name="app-version" content="MENLUN NEXUS · Sprint 3"/>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 76'%3E%3Cpath fill='%230B2A4A' d='M32 0C20 16 8 31 8 47c0 17 11 29 24 29s24-12 24-29C56 31 44 16 32 0z'/%3E%3Cpath fill='%2300A7D8' d='M32 53c8 0 14-6 14-14 0-10-9-20-14-27-5 7-14 17-14 27 0 8 6 14 14 14z'/%3E%3C/svg%3E"/>
+<title>MENLUN NEXUS · PMPS · Sprint 3.1</title>
+<meta name="app-version" content="MENLUN NEXUS · Sprint 3.1"/>
+<link rel="icon" href="favicon.svg?v=3.1" type="image/svg+xml"/>
+<link rel="shortcut icon" href="favicon.svg?v=3.1" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg?v=3.1"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
 <style>
 :root{
@@ -28,6 +30,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;background:linear-gradient(180deg,#F4F7FA 0%,#fff 100%)}
 .login-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:2rem;width:100%;max-width:380px;box-shadow:var(--shadow)}
 .pmps-logo{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:1.4rem}
+.login-version{margin-top:-8px;margin-bottom:14px;text-align:center;font-size:10px;letter-spacing:1.1px;font-weight:900;color:var(--cyan);text-transform:uppercase}
+.login-caption{text-align:center;font-size:11px;color:var(--text2);font-weight:700;margin-top:6px;margin-bottom:14px}
 .pmps-drop{width:54px;height:64px;margin-bottom:8px;position:relative}
 .pmps-drop:before{content:"";position:absolute;inset:0;background:var(--navy);clip-path:polygon(50% 0,88% 48%,78% 86%,50% 100%,22% 86%,12% 48%)}
 .pmps-drop:after{content:"";position:absolute;left:18px;right:18px;bottom:9px;height:26px;background:var(--cyan);border-radius:50% 50% 45% 45%;box-shadow:0 -17px 0 -7px #fff}
@@ -124,6 +128,8 @@ tr:hover td{background:#FAFCFD}
       <div class="pmps-drop"></div>
       <div class="pmps-word">PMPS<span class="pmps-reg">®</span></div>
     </div>
+    <div class="login-version">MENLUN NEXUS · SPRINT 3.1</div>
+    <div class="login-caption">Control operativo PMPS</div>
     <div class="form-group">
       <label>Usuario</label>
       <select id="login-user">
@@ -165,7 +171,7 @@ tr:hover td{background:#FAFCFD}
     <div class="content">
       <div class="exec-topbar">
         <div>
-          <div class="exec-system">MENLUN NEXUS · PMPS · Sprint 3</div>
+          <div class="exec-system">MENLUN NEXUS · PMPS · Sprint 3.1</div>
           <div class="exec-sub" id="top-user">—</div>
         </div>
         <div class="exec-actions">
@@ -276,7 +282,7 @@ const SB=supabase.createClient(
   {db:{schema:'menlun'}}
 );
 
-const APP_VERSION='sprint-3';
+const APP_VERSION='sprint-3.1';
 const SENTRY_DSN=''; // Pegar aquí el DSN real de Sentry cuando esté creado el proyecto.
 try{
   if(window.Sentry&&SENTRY_DSN){
