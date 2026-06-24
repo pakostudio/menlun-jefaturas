@@ -352,7 +352,8 @@
 <script>
 const SB = supabase.createClient(
   'https://bljqlibgwvpflrtwgsef.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsanFsaWJnd3ZwZmxydHdnc2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTE0NjgsImV4cCI6MjA5Njc4NzQ2OH0.F4ESg1FD0k4cTwGMT9E6n-LMr45FB0FZTfXmnuqHkJs'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsanFsaWJnd3ZwZmxydHdnc2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTE0NjgsImV4cCI6MjA5Njc4NzQ2OH0.F4ESg1FD0k4cTwGMT9E6n-LMr45FB0FZTfXmnuqHkJs',
+  { db: { schema: 'menlun' } }
 );
 
 
@@ -461,7 +462,7 @@ async function logAction(modulo, accion, detalle){
       accion,
       detalle: detalle || null,
       creado_en: new Date().toISOString()
-    }).schema('menlun');
+    });
   }catch(e){ console.warn('Bitácora no configurada aún', e?.message || e); }
 }
 function daysBetween(dateStr){
@@ -475,10 +476,10 @@ function daysBetween(dateStr){
 async function loadDashboard() {
   const hoy = new Date().toISOString().split('T')[0];
   const [rP,rM,rI,rC] = await Promise.all([
-    SB.from('pedidos').select('estatus,fecha_entrega_requerida').schema('menlun'),
-    SB.from('ordenes_mantenimiento').select('estatus,tipo').schema('menlun'),
-    SB.from('inventario').select('cantidad,stock_minimo').schema('menlun'),
-    SB.from('crm_seguimiento').select('tipo,estatus,fecha_seguimiento').schema('menlun'),
+    SB.from('pedidos').select('estatus,fecha_entrega_requerida'),
+    SB.from('ordenes_mantenimiento').select('estatus,tipo'),
+    SB.from('inventario').select('cantidad,stock_minimo'),
+    SB.from('crm_seguimiento').select('tipo,estatus,fecha_seguimiento'),
   ]);
   const p=rP.data||[],m=rM.data||[],i=rI.data||[],c=rC.data||[];
   const act=p.filter(x=>!['entregado','cancelado'].includes(x.estatus));
@@ -528,7 +529,7 @@ const LBL={pendiente:'Facturar',facturado:'En almacén',en_almacen:'Listo ruta',
 
 async function loadPedidos() {
   const hoy=new Date().toISOString().split('T')[0];
-  const {data}=await SB.from('pedidos').select('*,clientes(nombre)').schema('menlun').order('fecha_pedido',{ascending:false});
+  const {data}=await SB.from('pedidos').select('*,clientes(nombre)').order('fecha_pedido',{ascending:false});
   const p=data||[];
   if(!p.length){document.getElementById('t-pedidos').innerHTML=`<tr><td colspan="6" class="empty-state">Sin pedidos aún — agrega el primero</td></tr>`;return;}
   document.getElementById('t-pedidos').innerHTML=p.map(x=>{
@@ -545,7 +546,7 @@ async function loadPedidos() {
 }
 
 async function advancePedido(id,est){
-  await SB.from('pedidos').update({estatus:est,actualizado_en:new Date().toISOString()}).eq('id',id).schema('menlun');
+  await SB.from('pedidos').update({estatus:est,actualizado_en:new Date().toISOString()}).eq('id',id);
   await logAction('pedidos','cambio_estatus',`${id} → ${est}`);
   loadPedidos();
 }
@@ -554,7 +555,7 @@ async function advancePedido(id,est){
 /* ── BLOQUEOS ── */
 async function loadBloqueos(){
   try{
-    const {data,error}=await SB.from('bloqueos_operativos').select('*').schema('menlun').order('creado_en',{ascending:false});
+    const {data,error}=await SB.from('bloqueos_operativos').select('*').order('creado_en',{ascending:false});
     if(error) throw error;
     const rows=data||[];
     if(!rows.length){document.getElementById('t-bloqueos').innerHTML=`<tr><td colspan="8" class="empty-state">Sin bloqueos abiertos</td></tr>`;return;}
@@ -576,7 +577,7 @@ async function loadBloqueos(){
 
 async function loadBitacora(){
   try{
-    const {data,error}=await SB.from('bitacora_operativa').select('*').schema('menlun').order('creado_en',{ascending:false}).limit(80);
+    const {data,error}=await SB.from('bitacora_operativa').select('*').order('creado_en',{ascending:false}).limit(80);
     if(error) throw error;
     const rows=data||[];
     if(!rows.length){document.getElementById('t-bitacora').innerHTML=`<tr><td colspan="6" class="empty-state">Sin movimientos registrados</td></tr>`;return;}
@@ -597,7 +598,7 @@ async function loadBitacora(){
 
 /* ── MANTENIMIENTO ── */
 async function loadMant(){
-  const {data}=await SB.from('ordenes_mantenimiento').select('*').schema('menlun').order('creado_en',{ascending:false});
+  const {data}=await SB.from('ordenes_mantenimiento').select('*').order('creado_en',{ascending:false});
   const m=data||[];
   if(!m.length){document.getElementById('t-mant').innerHTML=`<tr><td colspan="7" class="empty-state">Sin órdenes — abre la primera</td></tr>`;return;}
   const ES={abierta:'bab',en_proceso:'bpr',cerrada:'bce',cancelada:'be'};
@@ -618,7 +619,7 @@ async function loadMant(){
 async function advanceMant(id,est){
   const u={estatus:est};
   if(est==='cerrada') u.fecha_cierre=new Date().toISOString().split('T')[0];
-  await SB.from('ordenes_mantenimiento').update(u).eq('id',id).schema('menlun');
+  await SB.from('ordenes_mantenimiento').update(u).eq('id',id);
   await logAction('mantenimiento','cambio_estatus',`${id} → ${est}`);
   loadMant();
 }
@@ -628,7 +629,7 @@ const TCS={visita:'bv',llamada:'bll',cotizacion:'bcot',muestra:'bmu',comodato:'b
 const ECS={pendiente:'bpr',realizado:'bce',cancelado:'be'};
 
 async function loadCRM(){
-  const {data}=await SB.from('crm_seguimiento').select('*,clientes(nombre)').schema('menlun').order('fecha_seguimiento',{ascending:true});
+  const {data}=await SB.from('crm_seguimiento').select('*,clientes(nombre)').order('fecha_seguimiento',{ascending:true});
   const c=data||[];
   const hoy=new Date().toISOString().split('T')[0];
   if(!c.length){document.getElementById('t-crm').innerHTML=`<tr><td colspan="7" class="empty-state">Sin seguimientos — agrega el primero</td></tr>`;return;}
@@ -647,14 +648,14 @@ async function loadCRM(){
 }
 
 async function closeCRM(id){
-  await SB.from('crm_seguimiento').update({estatus:'realizado'}).eq('id',id).schema('menlun');
+  await SB.from('crm_seguimiento').update({estatus:'realizado'}).eq('id',id);
   await logAction('crm','cerrar_seguimiento',id);
   loadCRM();
 }
 
 /* ── ALMACÉN ── */
 async function loadAlmacen(){
-  const {data}=await SB.from('inventario').select('*').schema('menlun').order('producto');
+  const {data}=await SB.from('inventario').select('*').order('producto');
   const i=data||[];
   if(!i.length){document.getElementById('t-almacen').innerHTML=`<tr><td colspan="7" class="empty-state">Sin productos — agrega el primero</td></tr>`;return;}
   const hoy=new Date().toISOString().split('T')[0];
@@ -747,10 +748,10 @@ async function savePedido(){
   const f=document.getElementById('mf').value.trim(), c=document.getElementById('mc').value.trim();
   if(!f||!c) return alert('Folio y cliente son obligatorios');
   let cid=null;
-  const {data:ce}=await SB.from('clientes').select('id').eq('nombre',c).schema('menlun').maybeSingle();
+  const {data:ce}=await SB.from('clientes').select('id').eq('nombre',c).maybeSingle();
   if(ce) cid=ce.id;
-  else { const {data:nc}=await SB.from('clientes').insert({nombre:c}).select('id').schema('menlun').single(); if(nc) cid=nc.id; }
-  await SB.from('pedidos').insert({folio:f,cliente_id:cid,fecha_entrega_requerida:document.getElementById('mfe').value||null,notas:document.getElementById('mn').value||null,estatus:'pendiente'}).schema('menlun');
+  else { const {data:nc}=await SB.from('clientes').insert({nombre:c}).select('id').single(); if(nc) cid=nc.id; }
+  await SB.from('pedidos').insert({folio:f,cliente_id:cid,fecha_entrega_requerida:document.getElementById('mfe').value||null,notas:document.getElementById('mn').value||null,estatus:'pendiente'});
   await logAction('pedidos','crear',f);
   closeModal(); loadPedidos();
 }
@@ -758,7 +759,7 @@ async function savePedido(){
 async function saveMant(){
   const f=document.getElementById('mf').value.trim(), eq=document.getElementById('meq').value.trim(), ar=document.getElementById('mar').value.trim();
   if(!f||!eq||!ar) return alert('Folio, equipo y área son obligatorios');
-  await SB.from('ordenes_mantenimiento').insert({folio:f,equipo:eq,area:ar,tipo:document.getElementById('mt').value,descripcion:document.getElementById('md').value||null,estatus:'abierta',fecha_apertura:new Date().toISOString().split('T')[0]}).schema('menlun');
+  await SB.from('ordenes_mantenimiento').insert({folio:f,equipo:eq,area:ar,tipo:document.getElementById('mt').value,descripcion:document.getElementById('md').value||null,estatus:'abierta',fecha_apertura:new Date().toISOString().split('T')[0]});
   await logAction('mantenimiento','crear',f);
   closeModal(); loadMant();
 }
@@ -767,10 +768,10 @@ async function saveCRM(){
   const c=document.getElementById('mc').value.trim();
   if(!c) return alert('El cliente es obligatorio');
   let cid=null;
-  const {data:ce}=await SB.from('clientes').select('id').eq('nombre',c).schema('menlun').maybeSingle();
+  const {data:ce}=await SB.from('clientes').select('id').eq('nombre',c).maybeSingle();
   if(ce) cid=ce.id;
-  else { const {data:nc}=await SB.from('clientes').insert({nombre:c}).select('id').schema('menlun').single(); if(nc) cid=nc.id; }
-  await SB.from('crm_seguimiento').insert({cliente_id:cid,tipo:document.getElementById('mt').value,descripcion:document.getElementById('md').value||null,compromiso:document.getElementById('mco').value||null,fecha_seguimiento:document.getElementById('mfe').value||null,estatus:'pendiente'}).schema('menlun');
+  else { const {data:nc}=await SB.from('clientes').insert({nombre:c}).select('id').single(); if(nc) cid=nc.id; }
+  await SB.from('crm_seguimiento').insert({cliente_id:cid,tipo:document.getElementById('mt').value,descripcion:document.getElementById('md').value||null,compromiso:document.getElementById('mco').value||null,fecha_seguimiento:document.getElementById('mfe').value||null,estatus:'pendiente'});
   await logAction('crm','crear',c);
   closeModal(); loadCRM();
 }
@@ -793,7 +794,7 @@ async function saveBloqueo(){
     creado_en:new Date().toISOString()
   };
   try{
-    const {error}=await SB.from('bloqueos_operativos').insert(payload).schema('menlun');
+    const {error}=await SB.from('bloqueos_operativos').insert(payload);
     if(error) throw error;
     await logAction('bloqueos','crear',`${payload.referencia} · ${payload.causa}`);
     closeModal(); loadBloqueos();
@@ -806,7 +807,7 @@ async function saveBloqueo(){
 async function saveInv(){
   const p=document.getElementById('mp').value.trim();
   if(!p) return alert('El nombre del producto es obligatorio');
-  await SB.from('inventario').insert({producto:p,lote:document.getElementById('ml').value||null,unidad:document.getElementById('mu').value||'pieza',cantidad:parseFloat(document.getElementById('mca').value)||0,stock_minimo:parseFloat(document.getElementById('mm').value)||0,caducidad:document.getElementById('mcd').value||null}).schema('menlun');
+  await SB.from('inventario').insert({producto:p,lote:document.getElementById('ml').value||null,unidad:document.getElementById('mu').value||'pieza',cantidad:parseFloat(document.getElementById('mca').value)||0,stock_minimo:parseFloat(document.getElementById('mm').value)||0,caducidad:document.getElementById('mcd').value||null});
   await logAction('almacen','crear_producto',p);
   closeModal(); loadAlmacen();
 }
@@ -814,11 +815,11 @@ async function saveInv(){
 async function buildReportData(){
   const hoy = new Date().toISOString().split('T')[0];
   const [rP,rM,rI,rC,rB] = await Promise.all([
-    SB.from('pedidos').select('folio,estatus,fecha_entrega_requerida,notas,clientes(nombre)').schema('menlun'),
-    SB.from('ordenes_mantenimiento').select('folio,equipo,tipo,estatus').schema('menlun'),
-    SB.from('inventario').select('producto,cantidad,stock_minimo,caducidad').schema('menlun'),
-    SB.from('crm_seguimiento').select('tipo,estatus,fecha_seguimiento,clientes(nombre)').schema('menlun'),
-    SB.from('bloqueos_operativos').select('tipo,referencia,cliente_area,causa,responsable,fecha_compromiso,estatus').schema('menlun')
+    SB.from('pedidos').select('folio,estatus,fecha_entrega_requerida,notas,clientes(nombre)'),
+    SB.from('ordenes_mantenimiento').select('folio,equipo,tipo,estatus'),
+    SB.from('inventario').select('producto,cantidad,stock_minimo,caducidad'),
+    SB.from('crm_seguimiento').select('tipo,estatus,fecha_seguimiento,clientes(nombre)'),
+    SB.from('bloqueos_operativos').select('tipo,referencia,cliente_area,causa,responsable,fecha_compromiso,estatus')
   ]);
   const p=rP.data||[], m=rM.data||[], i=rI.data||[], c=rC.data||[], b=rB.data||[];
   const act=p.filter(x=>!['entregado','cancelado'].includes(x.estatus));
