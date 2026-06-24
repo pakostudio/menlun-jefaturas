@@ -38,10 +38,6 @@
   .btn-primary { width: 100%; padding: 10px; border-radius: 8px; background: var(--navy); color: #fff; border: none; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 4px; }
   .btn-primary:hover { background: #142d54; }
   .login-error { color: var(--red); font-size: 11px; text-align: center; margin-top: 8px; display: none; }
-  .demo-hint { margin-top: 1rem; padding: 10px 12px; background: var(--bg); border-radius: 8px; }
-  .demo-hint-title { font-size: 10px; letter-spacing: 1px; color: var(--text2); margin-bottom: 8px; font-weight: 600; }
-  .demo-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px; color: var(--text2); border-radius: 4px; padding: 4px 6px; }
-  .demo-row:hover { background: var(--border); color: var(--text); }
   .area-chip { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
 
   /* MAIN LAYOUT */
@@ -137,6 +133,27 @@
   .empty-state { padding: 2rem; text-align: center; color: var(--text2); font-size: 13px; }
   .vencido { color: var(--red); font-weight: 600; }
 
+
+  /* TOPBAR EJECUTIVO */
+  .exec-topbar { position: sticky; top: 0; z-index: 50; display:flex; justify-content:space-between; align-items:center; gap:12px; padding: 12px 1.5rem; background: rgba(255,255,255,.96); border-bottom:1px solid var(--border); box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+  .exec-left { display:flex; align-items:center; gap:10px; min-width:0; }
+  .exec-system { font-size: 13px; font-weight:700; color:var(--navy); white-space:nowrap; }
+  .exec-sub { font-size: 11px; color:var(--text2); margin-top:1px; }
+  .exec-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+  .pill { border:1px solid #CBD3DF; border-radius:10px; padding:8px 12px; background:#FAFBFC; color:#667386; font-size:12px; font-weight:700; }
+  .pill-live { color:#1D7A46; }
+  .btn-top { border:1px solid #CBD3DF; border-radius:10px; padding:8px 12px; background:#fff; color:#667386; font-size:12px; font-weight:700; cursor:pointer; }
+  .btn-top:hover { background:var(--bg); color:var(--navy); }
+  .btn-top.primary { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .btn-top.gold { background:#FFF7E8; color:#794707; border-color:#F3D8A8; }
+  .actions-list { display:grid; gap:8px; }
+  .action-row { display:grid; grid-template-columns: 1.2fr 1fr .8fr .8fr; gap:8px; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); font-size:12px; }
+  .action-row:last-child { border-bottom:none; }
+  .action-title { font-weight:700; color:var(--text); }
+  .action-meta { color:var(--text2); font-size:11px; }
+  .textarea { width:100%; min-height:70px; resize:vertical; padding:9px 11px; border:1px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; outline:none; }
+  .toolbar-inline { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+
   /* RESPONSIVE */
   @media (max-width: 640px) {
     .sidebar { width: 56px; }
@@ -155,12 +172,12 @@
     <div class="login-logo">
       <div class="logo-dot"></div>
       <div>
-        <div class="logo-txt">ERP interno · Menlun</div>
-        <div class="logo-sub">Operadora Química Menlun S.A. de C.V.</div>
+        <div class="logo-txt">MENLUN NEXUS</div>
+        <div class="logo-sub">Plataforma de Gestión, Ejecución y Control Operativo</div>
       </div>
     </div>
-    <h2>Bienvenido</h2>
-    <p>Selecciona tu nombre y escribe tu PIN de acceso</p>
+    <h2>Acceso interno</h2>
+    <p>Consulta, actualiza y da seguimiento a pedidos, bloqueos, inventario, mantenimiento y compromisos operativos.</p>
     <div class="form-group">
       <label>Usuario</label>
       <select id="login-user">
@@ -180,15 +197,6 @@
     </div>
     <div id="login-error" class="login-error">Usuario o PIN incorrecto</div>
     <button class="btn-primary" onclick="login()">Entrar</button>
-    <div class="demo-hint">
-      <div class="demo-hint-title">ACCESO RÁPIDO — PIN para todos: 1234</div>
-      <div class="demo-row" onclick="quickLogin('Carmen Nieto|direccion')">Carmen Nieto <span class="area-chip" style="background:#FAEEDA;color:#633806;">Dirección</span></div>
-      <div class="demo-row" onclick="quickLogin('José Carlos González|ventas')">José Carlos González <span class="area-chip" style="background:#E6F1FB;color:#0C447C;">Ventas</span></div>
-      <div class="demo-row" onclick="quickLogin('Guillermo Nieto|logistica')">Guillermo Nieto <span class="area-chip" style="background:#E1F5EE;color:#085041;">Logística</span></div>
-      <div class="demo-row" onclick="quickLogin('Moisés Prado|almacen')">Moisés Prado <span class="area-chip" style="background:#FAEEDA;color:#633806;">Almacén</span></div>
-      <div class="demo-row" onclick="quickLogin('José Luis Sánchez|mantenimiento')">José Luis Sánchez <span class="area-chip" style="background:#FCEBEB;color:#791F1F;">Mantenimiento</span></div>
-      <div class="demo-row" onclick="quickLogin('Pako Ayala|admin')">Pako / Alan <span class="area-chip" style="background:#EEEDFE;color:#3C3489;">Admin</span></div>
-    </div>
   </div>
 </div>
 
@@ -208,6 +216,24 @@
 
     <div class="content">
 
+      <div class="exec-topbar">
+        <div class="exec-left">
+          <div>
+            <div class="exec-system">MENLUN NEXUS</div>
+            <div class="exec-sub" id="top-user">—</div>
+          </div>
+        </div>
+        <div class="exec-actions">
+          <span class="pill" id="top-date">—</span>
+          <span class="pill" id="top-role">—</span>
+          <span class="pill pill-live">● En vivo</span>
+          <button class="btn-top gold" onclick="exportPDF()"><i class="ti ti-file-export"></i> Exportar reporte PDF</button>
+          <button class="btn-top" onclick="goTo('bitacora', document.querySelector('[data-page=bitacora]'))"><i class="ti ti-history"></i> Bitácora</button>
+          <button class="btn-top" onclick="loadCurrentPage()"><i class="ti ti-refresh"></i> Actualizar datos</button>
+          <button class="btn-top primary" onclick="logout()">Cerrar sesión</button>
+        </div>
+      </div>
+
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="page-header">
@@ -224,6 +250,7 @@
           <div class="card"><div class="card-title">SEMÁFORO POR ÁREA</div><div id="d-semaforo"></div></div>
           <div class="card"><div class="card-title">ALERTAS ACTIVAS</div><div id="d-alertas"></div></div>
         </div>
+        <div class="card"><div class="card-title">ACCIONES PARA HOY</div><div id="d-acciones" class="actions-list"></div></div>
       </div>
 
       <!-- PEDIDOS -->
@@ -236,6 +263,35 @@
           <table>
             <thead><tr><th>FOLIO</th><th>CLIENTE</th><th>ENTREGA</th><th>ESTATUS</th><th>NOTAS</th><th>ACCIÓN</th></tr></thead>
             <tbody id="t-pedidos"><tr><td colspan="6" class="empty-state">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+
+      <!-- BLOQUEOS -->
+      <div class="page" id="page-bloqueos">
+        <div class="page-header">
+          <div><div class="page-title">Bloqueos operativos</div><div class="page-sub">Causas, responsables y días detenidos para destrabar operación</div></div>
+          <button class="btn-add" onclick="openModal('bloqueo')"><i class="ti ti-alert-triangle"></i> Nuevo bloqueo</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>TIPO</th><th>REFERENCIA</th><th>CLIENTE / ÁREA</th><th>CAUSA</th><th>RESPONSABLE</th><th>FECHA COMPROMISO</th><th>DÍAS</th><th>ESTATUS</th></tr></thead>
+            <tbody id="t-bloqueos"><tr><td colspan="8" class="empty-state">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BITÁCORA -->
+      <div class="page" id="page-bitacora">
+        <div class="page-header">
+          <div><div class="page-title">Bitácora operativa</div><div class="page-sub">Trazabilidad de altas, cambios de estatus y cierres por usuario</div></div>
+          <button class="btn-add" onclick="loadBitacora()"><i class="ti ti-refresh"></i> Actualizar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>FECHA/HORA</th><th>USUARIO</th><th>ÁREA</th><th>MÓDULO</th><th>ACCIÓN</th><th>DETALLE</th></tr></thead>
+            <tbody id="t-bitacora"><tr><td colspan="6" class="empty-state">Cargando...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -289,6 +345,9 @@
 <!-- MODAL CONTAINER -->
 <div id="modal-container"></div>
 
+<script src="https://browser.sentry-cdn.com/8.34.0/bundle.tracing.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 const SB = supabase.createClient(
@@ -296,23 +355,37 @@ const SB = supabase.createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsanFsaWJnd3ZwZmxydHdnc2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTE0NjgsImV4cCI6MjA5Njc4NzQ2OH0.F4ESg1FD0k4cTwGMT9E6n-LMr45FB0FZTfXmnuqHkJs'
 );
 
+
+try {
+  if (window.Sentry) {
+    Sentry.init({
+      dsn: "", // Agregar DSN real de Sentry al pasar a producción
+      tracesSampleRate: 0.2,
+      environment: "production"
+    });
+  }
+} catch(e) {}
+
 let currentUser = null;
 let currentArea = null;
+let currentPage = 'dashboard';
 
 const NAV = {
-  admin:         ['dashboard','pedidos','mantenimiento','crm','almacen'],
-  direccion:     ['dashboard','pedidos','mantenimiento','crm','almacen'],
-  ventas:        ['dashboard','pedidos','crm'],
-  logistica:     ['dashboard','pedidos'],
-  almacen:       ['dashboard','almacen'],
-  mantenimiento: ['dashboard','mantenimiento'],
+  admin:         ['dashboard','pedidos','bloqueos','mantenimiento','crm','almacen','bitacora'],
+  direccion:     ['dashboard','pedidos','bloqueos','mantenimiento','crm','almacen','bitacora'],
+  ventas:        ['dashboard','pedidos','bloqueos','crm'],
+  logistica:     ['dashboard','pedidos','bloqueos'],
+  almacen:       ['dashboard','almacen','bloqueos'],
+  mantenimiento: ['dashboard','mantenimiento','bloqueos'],
 };
 const NAV_META = {
   dashboard:     { icon: 'ti-layout-dashboard', label: 'Tablero' },
   pedidos:       { icon: 'ti-package',          label: 'Pedidos' },
+  bloqueos:      { icon: 'ti-alert-triangle',   label: 'Bloqueos' },
   mantenimiento: { icon: 'ti-tool',             label: 'Mantenimiento' },
   crm:           { icon: 'ti-users',            label: 'CRM Ventas' },
   almacen:       { icon: 'ti-building-warehouse', label: 'Almacén' },
+  bitacora:      { icon: 'ti-history',          label: 'Bitácora' },
 };
 const AREA_LABEL = { admin:'Admin', direccion:'Dirección', ventas:'Ventas', logistica:'Logística', almacen:'Almacén', mantenimiento:'Mantenimiento' };
 
@@ -334,10 +407,14 @@ function enterApp(nombre, area) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-screen').style.display = 'block';
   document.getElementById('sb-user').innerHTML = `<strong>${nombre}</strong><br>${AREA_LABEL[area]||area}`;
+  document.getElementById('top-user').textContent = nombre;
+  document.getElementById('top-role').textContent = AREA_LABEL[area] || area;
+  updateTopDate();
+  if (window.Sentry) { Sentry.setUser({ username:nombre }); Sentry.setTag('area', area); }
   const paginas = NAV[area] || ['dashboard'];
   document.getElementById('nav-menu').innerHTML =
     `<div class="nav-section-title">MENÚ</div>` +
-    paginas.map(p => `<div class="nav-item${p==='dashboard'?' active':''}" onclick="goTo('${p}',this)"><i class="ti ${NAV_META[p].icon}"></i><span>${NAV_META[p].label}</span></div>`).join('');
+    paginas.map(p => `<div class="nav-item${p==='dashboard'?' active':''}" data-page="${p}" onclick="goTo('${p}',this)"><i class="ti ${NAV_META[p].icon}"></i><span>${NAV_META[p].label}</span></div>`).join('');
   document.getElementById('dash-greeting').textContent = `Buenos días, ${nombre.split(' ')[0]}`;
   document.getElementById('dash-date').textContent = new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   goTo('dashboard', document.querySelector('.nav-item'));
@@ -352,12 +429,46 @@ function logout() {
 }
 
 function goTo(page, el) {
+  currentPage = page;
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   if (el) el.classList.add('active');
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  const loaders = { dashboard: loadDashboard, pedidos: loadPedidos, mantenimiento: loadMant, crm: loadCRM, almacen: loadAlmacen };
+  const loaders = { dashboard: loadDashboard, pedidos: loadPedidos, bloqueos: loadBloqueos, mantenimiento: loadMant, crm: loadCRM, almacen: loadAlmacen, bitacora: loadBitacora };
   if (loaders[page]) loaders[page]();
+}
+
+
+function updateTopDate(){
+  const el=document.getElementById('top-date');
+  if(el) el.textContent = new Date().toLocaleString('es-MX',{weekday:'short',year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+function loadCurrentPage(){
+  updateTopDate();
+  const loaders = { dashboard: loadDashboard, pedidos: loadPedidos, bloqueos: loadBloqueos, mantenimiento: loadMant, crm: loadCRM, almacen: loadAlmacen, bitacora: loadBitacora };
+  if(loaders[currentPage]) loaders[currentPage]();
+}
+function captureError(error, context){
+  console.error(context, error);
+  if(window.Sentry) Sentry.captureException(error, { tags:{context} });
+}
+async function logAction(modulo, accion, detalle){
+  try{
+    await SB.from('bitacora_operativa').insert({
+      usuario: currentUser || 'Sistema',
+      area: currentArea || 'sin_area',
+      modulo,
+      accion,
+      detalle: detalle || null,
+      creado_en: new Date().toISOString()
+    }).schema('menlun');
+  }catch(e){ console.warn('Bitácora no configurada aún', e?.message || e); }
+}
+function daysBetween(dateStr){
+  if(!dateStr) return 0;
+  const a=new Date(dateStr+'T00:00:00');
+  const b=new Date(new Date().toISOString().split('T')[0]+'T00:00:00');
+  return Math.max(0, Math.floor((b-a)/(1000*60*60*24)));
 }
 
 /* ── DASHBOARD ── */
@@ -398,6 +509,16 @@ async function loadDashboard() {
   if(pend>3) al.push(`📋 ${pend} seguimientos comerciales pendientes`);
   if(!al.length) al.push('✅ Todo en orden — sin alertas activas');
   document.getElementById('d-alertas').innerHTML=al.map(a=>`<div style="font-size:12px;padding:8px 0;border-bottom:1px solid var(--border);">${a}</div>`).join('');
+  const acciones=[];
+  ven.slice(0,3).forEach(x=>acciones.push(['Pedido vencido',x.folio||'—','Logística / Facturación',x.fecha_entrega_requerida||'—']));
+  sc.slice(0,3).forEach(x=>acciones.push(['Stock crítico',x.producto||'Producto','Almacén',x.caducidad||'—']));
+  c.filter(x=>x.estatus==='pendiente'&&x.fecha_seguimiento&&x.fecha_seguimiento<=hoy).slice(0,3).forEach(x=>acciones.push(['Seguimiento comercial',x.tipo||'CRM','Ventas',x.fecha_seguimiento||'—']));
+  if(!acciones.length) acciones.push(['Sin acciones críticas','Operación estable','Dirección','Hoy']);
+  document.getElementById('d-acciones').innerHTML=acciones.map(([t,r,a,f])=>`
+    <div class="action-row">
+      <div><div class="action-title">${t}</div><div class="action-meta">${r}</div></div>
+      <div>${a}</div><div>${f}</div><div><span class="badge bpr">Atender</span></div>
+    </div>`).join('');
 }
 
 /* ── PEDIDOS ── */
@@ -425,8 +546,54 @@ async function loadPedidos() {
 
 async function advancePedido(id,est){
   await SB.from('pedidos').update({estatus:est,actualizado_en:new Date().toISOString()}).eq('id',id).schema('menlun');
+  await logAction('pedidos','cambio_estatus',`${id} → ${est}`);
   loadPedidos();
 }
+
+
+/* ── BLOQUEOS ── */
+async function loadBloqueos(){
+  try{
+    const {data,error}=await SB.from('bloqueos_operativos').select('*').schema('menlun').order('creado_en',{ascending:false});
+    if(error) throw error;
+    const rows=data||[];
+    if(!rows.length){document.getElementById('t-bloqueos').innerHTML=`<tr><td colspan="8" class="empty-state">Sin bloqueos abiertos</td></tr>`;return;}
+    document.getElementById('t-bloqueos').innerHTML=rows.map(x=>`<tr>
+      <td><span class="badge bf">${x.tipo||'operativo'}</span></td>
+      <td><strong>${x.referencia||'—'}</strong></td>
+      <td>${x.cliente_area||'—'}</td>
+      <td>${x.causa||'—'}</td>
+      <td>${x.responsable||'—'}</td>
+      <td>${x.fecha_compromiso||'—'}</td>
+      <td>${daysBetween((x.creado_en||'').slice(0,10))}</td>
+      <td><span class="badge ${x.estatus==='cerrado'?'bce':'bab'}">${x.estatus||'abierto'}</span></td>
+    </tr>`).join('');
+  }catch(error){
+    captureError(error,'loadBloqueos');
+    document.getElementById('t-bloqueos').innerHTML=`<tr><td colspan="8" class="empty-state">Configura la tabla menlun.bloqueos_operativos para activar bloqueos reales. Mientras tanto, usa pedidos vencidos y stock crítico desde el tablero.</td></tr>`;
+  }
+}
+
+async function loadBitacora(){
+  try{
+    const {data,error}=await SB.from('bitacora_operativa').select('*').schema('menlun').order('creado_en',{ascending:false}).limit(80);
+    if(error) throw error;
+    const rows=data||[];
+    if(!rows.length){document.getElementById('t-bitacora').innerHTML=`<tr><td colspan="6" class="empty-state">Sin movimientos registrados</td></tr>`;return;}
+    document.getElementById('t-bitacora').innerHTML=rows.map(x=>`<tr>
+      <td>${x.creado_en?new Date(x.creado_en).toLocaleString('es-MX'):'—'}</td>
+      <td><strong>${x.usuario||'—'}</strong></td>
+      <td>${AREA_LABEL[x.area]||x.area||'—'}</td>
+      <td>${x.modulo||'—'}</td>
+      <td><span class="badge bce">${x.accion||'—'}</span></td>
+      <td style="color:var(--text2);font-size:11px;">${x.detalle||'—'}</td>
+    </tr>`).join('');
+  }catch(error){
+    captureError(error,'loadBitacora');
+    document.getElementById('t-bitacora').innerHTML=`<tr><td colspan="6" class="empty-state">Configura la tabla menlun.bitacora_operativa para activar trazabilidad completa.</td></tr>`;
+  }
+}
+
 
 /* ── MANTENIMIENTO ── */
 async function loadMant(){
@@ -452,6 +619,7 @@ async function advanceMant(id,est){
   const u={estatus:est};
   if(est==='cerrada') u.fecha_cierre=new Date().toISOString().split('T')[0];
   await SB.from('ordenes_mantenimiento').update(u).eq('id',id).schema('menlun');
+  await logAction('mantenimiento','cambio_estatus',`${id} → ${est}`);
   loadMant();
 }
 
@@ -480,6 +648,7 @@ async function loadCRM(){
 
 async function closeCRM(id){
   await SB.from('crm_seguimiento').update({estatus:'realizado'}).eq('id',id).schema('menlun');
+  await logAction('crm','cerrar_seguimiento',id);
   loadCRM();
 }
 
@@ -542,6 +711,20 @@ function openModal(type){
       <div class="form-group"><label>Fecha de seguimiento</label><input type="date" id="mfe"/></div>
       <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveCRM()">Guardar</button></div>
     </div>`,
+    bloqueo:`<div class="modal-box"><div class="modal-title">Nuevo bloqueo operativo</div>
+      <div class="f2">
+        <div class="form-group"><label>Tipo</label><select id="mbt"><option value="pedido">Pedido</option><option value="backorder">Backorder</option><option value="almacen">Almacén</option><option value="logistica">Logística</option><option value="mantenimiento">Mantenimiento</option><option value="crm">CRM</option></select></div>
+        <div class="form-group"><label>Referencia</label><input id="mbr" placeholder="POQ-2881 / OT-001"/></div>
+      </div>
+      <div class="form-group"><label>Cliente / área</label><input id="mba" placeholder="Cliente o área responsable"/></div>
+      <div class="form-group"><label>Causa del bloqueo</label><select id="mbc"><option>Falta factura</option><option>Falta surtido</option><option>Falta producto</option><option>Falta autorización</option><option>Falta unidad</option><option>Falta evidencia</option><option>Crédito / cobranza</option><option>Error de captura</option><option>Otro</option></select></div>
+      <div class="f2">
+        <div class="form-group"><label>Responsable</label><input id="mbres" placeholder="Nombre del responsable"/></div>
+        <div class="form-group"><label>Fecha compromiso</label><input type="date" id="mbf"/></div>
+      </div>
+      <div class="form-group"><label>Detalle / acción requerida</label><textarea class="textarea" id="mbd" placeholder="Qué debe pasar para destrabar"></textarea></div>
+      <div class="form-actions"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveBloqueo()">Guardar</button></div>
+    </div>`,
     inv:`<div class="modal-box"><div class="modal-title">Nuevo producto en inventario</div>
       <div class="form-group"><label>Producto</label><input id="mp" placeholder="Ej. H3 Super Foam, garrafón 25 Kg"/></div>
       <div class="f2">
@@ -568,6 +751,7 @@ async function savePedido(){
   if(ce) cid=ce.id;
   else { const {data:nc}=await SB.from('clientes').insert({nombre:c}).select('id').schema('menlun').single(); if(nc) cid=nc.id; }
   await SB.from('pedidos').insert({folio:f,cliente_id:cid,fecha_entrega_requerida:document.getElementById('mfe').value||null,notas:document.getElementById('mn').value||null,estatus:'pendiente'}).schema('menlun');
+  await logAction('pedidos','crear',f);
   closeModal(); loadPedidos();
 }
 
@@ -575,6 +759,7 @@ async function saveMant(){
   const f=document.getElementById('mf').value.trim(), eq=document.getElementById('meq').value.trim(), ar=document.getElementById('mar').value.trim();
   if(!f||!eq||!ar) return alert('Folio, equipo y área son obligatorios');
   await SB.from('ordenes_mantenimiento').insert({folio:f,equipo:eq,area:ar,tipo:document.getElementById('mt').value,descripcion:document.getElementById('md').value||null,estatus:'abierta',fecha_apertura:new Date().toISOString().split('T')[0]}).schema('menlun');
+  await logAction('mantenimiento','crear',f);
   closeModal(); loadMant();
 }
 
@@ -586,15 +771,107 @@ async function saveCRM(){
   if(ce) cid=ce.id;
   else { const {data:nc}=await SB.from('clientes').insert({nombre:c}).select('id').schema('menlun').single(); if(nc) cid=nc.id; }
   await SB.from('crm_seguimiento').insert({cliente_id:cid,tipo:document.getElementById('mt').value,descripcion:document.getElementById('md').value||null,compromiso:document.getElementById('mco').value||null,fecha_seguimiento:document.getElementById('mfe').value||null,estatus:'pendiente'}).schema('menlun');
+  await logAction('crm','crear',c);
   closeModal(); loadCRM();
+}
+
+
+async function saveBloqueo(){
+  const ref=document.getElementById('mbr').value.trim();
+  const responsable=document.getElementById('mbres').value.trim();
+  if(!ref||!responsable) return alert('Referencia y responsable son obligatorios');
+  const payload={
+    tipo:document.getElementById('mbt').value,
+    referencia:ref,
+    cliente_area:document.getElementById('mba').value||null,
+    causa:document.getElementById('mbc').value,
+    responsable,
+    fecha_compromiso:document.getElementById('mbf').value||null,
+    detalle:document.getElementById('mbd').value||null,
+    estatus:'abierto',
+    creado_por:currentUser,
+    creado_en:new Date().toISOString()
+  };
+  try{
+    const {error}=await SB.from('bloqueos_operativos').insert(payload).schema('menlun');
+    if(error) throw error;
+    await logAction('bloqueos','crear',`${payload.referencia} · ${payload.causa}`);
+    closeModal(); loadBloqueos();
+  }catch(error){
+    captureError(error,'saveBloqueo');
+    alert('No se pudo guardar el bloqueo. Revisa que exista la tabla menlun.bloqueos_operativos y sus políticas RLS.');
+  }
 }
 
 async function saveInv(){
   const p=document.getElementById('mp').value.trim();
   if(!p) return alert('El nombre del producto es obligatorio');
   await SB.from('inventario').insert({producto:p,lote:document.getElementById('ml').value||null,unidad:document.getElementById('mu').value||'pieza',cantidad:parseFloat(document.getElementById('mca').value)||0,stock_minimo:parseFloat(document.getElementById('mm').value)||0,caducidad:document.getElementById('mcd').value||null}).schema('menlun');
+  await logAction('almacen','crear_producto',p);
   closeModal(); loadAlmacen();
 }
+
+async function buildReportData(){
+  const hoy = new Date().toISOString().split('T')[0];
+  const [rP,rM,rI,rC,rB] = await Promise.all([
+    SB.from('pedidos').select('folio,estatus,fecha_entrega_requerida,notas,clientes(nombre)').schema('menlun'),
+    SB.from('ordenes_mantenimiento').select('folio,equipo,tipo,estatus').schema('menlun'),
+    SB.from('inventario').select('producto,cantidad,stock_minimo,caducidad').schema('menlun'),
+    SB.from('crm_seguimiento').select('tipo,estatus,fecha_seguimiento,clientes(nombre)').schema('menlun'),
+    SB.from('bloqueos_operativos').select('tipo,referencia,cliente_area,causa,responsable,fecha_compromiso,estatus').schema('menlun')
+  ]);
+  const p=rP.data||[], m=rM.data||[], i=rI.data||[], c=rC.data||[], b=rB.data||[];
+  const act=p.filter(x=>!['entregado','cancelado'].includes(x.estatus));
+  const ven=act.filter(x=>x.fecha_entrega_requerida&&x.fecha_entrega_requerida<hoy);
+  const sc=i.filter(x=>x.stock_minimo>0&&x.cantidad<=x.stock_minimo);
+  const ma=m.filter(x=>['abierta','en_proceso'].includes(x.estatus));
+  const crm=c.filter(x=>x.estatus==='pendiente'&&x.fecha_seguimiento&&x.fecha_seguimiento<=hoy);
+  return {hoy,p,act,ven,sc,ma,crm,b};
+}
+
+async function exportPDF(){
+  try{
+    updateTopDate();
+    const d=await buildReportData();
+    if(!window.jspdf || !window.jspdf.jsPDF){
+      window.print();
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({orientation:'portrait', unit:'pt', format:'letter'});
+    doc.setFont('helvetica','bold'); doc.setFontSize(16);
+    doc.text('MENLUN NEXUS · Reporte Ejecutivo Operativo', 40, 44);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.text(`Corte: ${new Date().toLocaleString('es-MX')} · Usuario: ${currentUser || '—'} · Rol: ${AREA_LABEL[currentArea] || currentArea || '—'}`, 40, 62);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('Indicadores clave', 40, 92);
+    doc.autoTable({
+      startY:100,
+      head:[['Pedidos activos','Pedidos vencidos','Bloqueos abiertos','Órdenes mantenimiento','Stock crítico','CRM vencido']],
+      body:[[d.act.length,d.ven.length,d.b.filter(x=>x.estatus!=='cerrado').length,d.ma.length,d.sc.length,d.crm.length]],
+      styles:{fontSize:9}, headStyles:{fillColor:[27,58,107]}
+    });
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('Bloqueos / acciones críticas', 40, doc.lastAutoTable.finalY + 28);
+    const rows=[
+      ...d.ven.slice(0,8).map(x=>['Pedido vencido',x.folio||'—',x.clientes?.nombre||'—','Logística / Facturación',x.fecha_entrega_requerida||'—']),
+      ...d.sc.slice(0,8).map(x=>['Stock crítico',x.producto||'—',`${x.cantidad}/${x.stock_minimo}`,'Almacén',x.caducidad||'—']),
+      ...d.b.filter(x=>x.estatus!=='cerrado').slice(0,8).map(x=>[x.tipo||'Bloqueo',x.referencia||'—',x.causa||'—',x.responsable||'—',x.fecha_compromiso||'—'])
+    ];
+    doc.autoTable({
+      startY:doc.lastAutoTable.finalY + 36,
+      head:[['Tipo','Referencia','Detalle','Responsable','Fecha']],
+      body: rows.length ? rows : [['Sin críticos','—','Operación estable','—','—']],
+      styles:{fontSize:8}, headStyles:{fillColor:[27,58,107]}
+    });
+    doc.save(`MENLUN_NEXUS_Reporte_${d.hoy}.pdf`);
+    await logAction('reportes','exportar_pdf',`Reporte ejecutivo ${d.hoy}`);
+  }catch(error){
+    captureError(error,'exportPDF');
+    alert('No se pudo exportar el reporte. Revisa conexión, permisos o librerías PDF.');
+  }
+}
+
 </script>
 </body>
 </html>
