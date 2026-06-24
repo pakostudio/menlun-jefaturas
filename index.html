@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MENLUN NEXUS · PMPS</title>
+<title>MENLUN NEXUS · PMPS · Sprint 3</title>
+<meta name="app-version" content="MENLUN NEXUS · Sprint 3"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 76'%3E%3Cpath fill='%230B2A4A' d='M32 0C20 16 8 31 8 47c0 17 11 29 24 29s24-12 24-29C56 31 44 16 32 0z'/%3E%3Cpath fill='%2300A7D8' d='M32 53c8 0 14-6 14-14 0-10-9-20-14-27-5 7-14 17-14 27 0 8 6 14 14 14z'/%3E%3C/svg%3E"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
 <style>
 :root{
@@ -163,7 +165,7 @@ tr:hover td{background:#FAFCFD}
     <div class="content">
       <div class="exec-topbar">
         <div>
-          <div class="exec-system">MENLUN NEXUS · PMPS</div>
+          <div class="exec-system">MENLUN NEXUS · PMPS · Sprint 3</div>
           <div class="exec-sub" id="top-user">—</div>
         </div>
         <div class="exec-actions">
@@ -274,7 +276,13 @@ const SB=supabase.createClient(
   {db:{schema:'menlun'}}
 );
 
-try{if(window.Sentry){Sentry.init({dsn:"",tracesSampleRate:.2,environment:"production"});}}catch(e){}
+const APP_VERSION='sprint-3';
+const SENTRY_DSN=''; // Pegar aquí el DSN real de Sentry cuando esté creado el proyecto.
+try{
+  if(window.Sentry&&SENTRY_DSN){
+    Sentry.init({dsn:SENTRY_DSN,tracesSampleRate:.2,environment:'production',release:'menlun-nexus@'+APP_VERSION});
+  }
+}catch(e){console.warn('Sentry no inició',e?.message||e);}
 
 let currentUser=null,currentArea=null,currentPage='dashboard';
 
@@ -346,7 +354,18 @@ function loadCurrentPage(){
   const loaders={dashboard:loadDashboard,pedidos:loadPedidos,flujo:loadFlujo,bloqueos:loadBloqueos,mantenimiento:loadMant,crm:loadCRM,almacen:loadAlmacen,bitacora:loadBitacora};
   if(loaders[currentPage])loaders[currentPage]();
 }
-function captureError(error,context){console.error(context,error);if(window.Sentry)Sentry.captureException(error,{tags:{context}});}
+function friendlyError(error){
+  const msg=error?.message||String(error||'Error desconocido');
+  if(msg.includes('row-level security')||msg.includes('RLS'))return 'Permisos/RLS en Supabase: revisa policies de la tabla.';
+  if(msg.includes('schema')||msg.includes('relation')||msg.includes('does not exist'))return 'Tabla o schema no disponible en Supabase.';
+  if(msg.includes('duplicate key'))return 'Registro duplicado: revisa folio, lote o identificador.';
+  if(msg.includes('network')||msg.includes('Failed to fetch'))return 'Conexión: revisa internet o Supabase.';
+  return msg;
+}
+function captureError(error,context){
+  console.error(context,error);
+  if(window.Sentry&&SENTRY_DSN)Sentry.captureException(error,{tags:{context},extra:{message:error?.message,details:error?.details,hint:error?.hint}});
+}
 async function logAction(modulo,accion,detalle){
   try{await SB.from('bitacora_operativa').insert({usuario:currentUser||'Sistema',area:currentArea||'sin_area',modulo,accion,detalle:detalle||null,creado_en:new Date().toISOString()});}
   catch(e){console.warn('Bitácora no configurada aún',e?.message||e);}
@@ -456,11 +475,11 @@ async function advanceFlujo(id,next){
   try{
     const update={etapa_actual:next,actualizado_en:new Date().toISOString()};
     if(next==='cerrado')update.cerrado_en=new Date().toISOString();
-    const{error}=await SB.from('flujo_pedidos').update(update).eq('id',id);
+    const{data,error}=await SB.from('flujo_pedidos').update(update).eq('id',id).select('folio,cliente,etapa_actual').single();
     if(error)throw error;
-    await logAction('flujo','avance_etapa',`${id} → ${FLOW_LABEL[next]||next}`);
+    await logAction('flujo','avance_etapa',`${data?.folio||'Flujo'} · ${data?.cliente||'—'} → ${FLOW_LABEL[next]||next}`);
     loadFlujo();
-  }catch(error){captureError(error,'advanceFlujo');alert('No se pudo avanzar el flujo. Revisa conexión o permisos.');}
+  }catch(error){captureError(error,'advanceFlujo');alert('No se pudo avanzar el flujo. '+friendlyError(error));}
 }
 async function saveFlujo(){
   const folio=document.getElementById('mff').value.trim();
@@ -473,7 +492,7 @@ async function saveFlujo(){
     if(error)throw error;
     await logAction('flujo','crear',`${payload.folio} · ${payload.cliente}`);
     closeModal();loadFlujo();
-  }catch(error){captureError(error,'saveFlujo');alert('No se pudo guardar el flujo. Primero ejecuta el SQL de Sprint 2 en Supabase.');}
+  }catch(error){captureError(error,'saveFlujo');alert('No se pudo guardar el flujo. '+friendlyError(error));}
 }
 
 async function loadBloqueos(){
@@ -482,8 +501,18 @@ async function loadBloqueos(){
     if(error)throw error;
     const rows=data||[];
     if(!rows.length){document.getElementById('t-bloqueos').innerHTML=`<tr><td colspan="8" class="empty-state">Sin bloqueos abiertos</td></tr>`;return;}
-    document.getElementById('t-bloqueos').innerHTML=rows.map(x=>`<tr><td><span class="badge bf">${x.tipo||'operativo'}</span></td><td><strong>${x.referencia||'—'}</strong></td><td>${x.cliente_area||'—'}</td><td>${x.causa||'—'}</td><td>${x.responsable||'—'}</td><td>${x.fecha_compromiso||'—'}</td><td>${daysBetween((x.creado_en||'').slice(0,10))}</td><td><span class="badge ${x.estatus==='cerrado'?'bce':'bab'}">${x.estatus||'abierto'}</span></td></tr>`).join('');
+    document.getElementById('t-bloqueos').innerHTML=rows.map(x=>`<tr><td><span class="badge bf">${x.tipo||'operativo'}</span></td><td><strong>${x.referencia||'—'}</strong></td><td>${x.cliente_area||'—'}</td><td>${x.causa||'—'}</td><td>${x.responsable||'—'}</td><td>${x.fecha_compromiso||'—'}</td><td>${daysBetween((x.creado_en||'').slice(0,10))}</td><td><span class="badge ${x.estatus==='cerrado'?'bce':'bab'}">${x.estatus||'abierto'}</span><br>${x.estatus==='cerrado'?`<button class="btn-sm" onclick="toggleBloqueo('${x.id}','abierto')">Reabrir</button>`:`<button class="btn-sm ok" onclick="toggleBloqueo('${x.id}','cerrado')">Cerrar</button>`}</td></tr>`).join('');
   }catch(error){captureError(error,'loadBloqueos');document.getElementById('t-bloqueos').innerHTML=`<tr><td colspan="8" class="empty-state">Configura la tabla menlun.bloqueos_operativos para activar bloqueos reales.</td></tr>`;}
+}
+async function toggleBloqueo(id,estatus){
+  try{
+    const payload={estatus};
+    if(estatus==='cerrado')payload.cerrado_en=new Date().toISOString();
+    const{error}=await SB.from('bloqueos_operativos').update(payload).eq('id',id);
+    if(error)throw error;
+    await logAction('bloqueos',estatus==='cerrado'?'cerrar':'reabrir',id);
+    loadBloqueos();
+  }catch(error){captureError(error,'toggleBloqueo');alert('No se pudo actualizar el bloqueo. '+friendlyError(error));}
 }
 async function loadBitacora(){
   try{
@@ -569,7 +598,7 @@ async function saveBloqueo(){
   if(!ref||!responsable)return alert('Referencia y responsable son obligatorios');
   const payload={tipo:document.getElementById('mbt').value,referencia:ref,cliente_area:document.getElementById('mba').value||null,causa:document.getElementById('mbc').value,responsable,fecha_compromiso:document.getElementById('mbf').value||null,detalle:document.getElementById('mbd').value||null,estatus:'abierto',creado_por:currentUser,creado_en:new Date().toISOString()};
   try{const{error}=await SB.from('bloqueos_operativos').insert(payload);if(error)throw error;await logAction('bloqueos','crear',`${payload.referencia} · ${payload.causa}`);closeModal();loadBloqueos();}
-  catch(error){captureError(error,'saveBloqueo');alert('No se pudo guardar el bloqueo. Revisa tabla y políticas.');}
+  catch(error){captureError(error,'saveBloqueo');alert('No se pudo guardar el bloqueo. '+friendlyError(error));}
 }
 async function saveMant(){
   const f=document.getElementById('mf').value.trim(),eq=document.getElementById('meq').value.trim(),ar=document.getElementById('mar').value.trim();
@@ -589,8 +618,14 @@ async function saveCRM(){
 async function saveInv(){
   const p=document.getElementById('mp').value.trim();
   if(!p)return alert('El nombre del producto es obligatorio');
-  await SB.from('inventario').insert({producto:p,lote:document.getElementById('ml').value||null,unidad:document.getElementById('mu').value||'pieza',cantidad:parseFloat(document.getElementById('mca').value)||0,stock_minimo:parseFloat(document.getElementById('mm').value)||0,caducidad:document.getElementById('mcd').value||null});
-  await logAction('almacen','crear_producto',p);closeModal();loadAlmacen();
+  const cantidad=parseFloat(document.getElementById('mca').value)||0;
+  const stockMin=parseFloat(document.getElementById('mm').value)||0;
+  if(cantidad<0||stockMin<0)return alert('Cantidad y stock mínimo no pueden ser negativos');
+  try{
+    const{error}=await SB.from('inventario').insert({producto:p,lote:document.getElementById('ml').value||null,unidad:document.getElementById('mu').value||'pieza',cantidad,stock_minimo:stockMin,caducidad:document.getElementById('mcd').value||null});
+    if(error)throw error;
+    await logAction('almacen','crear_producto',`${p} · stock ${cantidad}/${stockMin}`);closeModal();loadAlmacen();loadDashboard();
+  }catch(error){captureError(error,'saveInv');alert('No se pudo guardar el producto. '+friendlyError(error));}
 }
 
 async function buildReportData(){
